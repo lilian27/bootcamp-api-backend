@@ -138,7 +138,7 @@ app.post('/api/persons', (request, response) => {
 
 
 //notas
-app.get('/notes', (request, response) => {
+app.get('/api/notes', (request, response) => {
     response.json(notes)
 })
 
