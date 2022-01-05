@@ -1,56 +1,17 @@
+require('./mongo')  // como se importa y se ejecuta y se conecta y ya o hacer una funcion en mongo y llamarla
 //const http = require('http')
 const express = require('express')
+const app = express()
 const cors = require('cors')
 
-const app = express()
+const Note = require('./models/Note')
+const Person = require('./models/Person')
+const notFound = require('./middleware/notFound.js')
+const handleErrors = require('./middleware/handleErrors.js')
 
-//liberando cualquier origen
-app.use(cors())  
+app.use(cors()) //liberando cualquier origen
 app.use(express.json())
-
-let notes = [
-    {
-        id: 1,
-        content: "HTML is easy",
-        date: "2019-05-30T17:30:31.098Z",
-        important: true
-    },
-    {
-        id: 2,
-        content: "Browser can execute only Javascript",
-        date: "2019-05-30T18:39:34.091Z",
-        important: false
-    },
-    {
-        id: 3,
-        content: "GET and POST are the most important methods of HTTP protocol",
-        date: "2019-05-30T19:20:14.298Z",
-        important: true
-    }
-]
-
-let persons = [
-    {
-        "id": 1,
-        "name": "Arto Hellas",
-        "number": "040-123456"
-    },
-    {
-        "id": 2,
-        "name": "Lilian",
-        "number": "27-88"
-    },
-    {
-        "id": 3,
-        "name": "Isaac",
-        "number": "04435"
-    },
-    {
-        "id": 4,
-        "name": "daniel_",
-        "number": "040-1435"
-    }
-]
+app.use('/images', express.static('images'))
 
 const maxIdRamdom = 999999999
 
@@ -80,37 +41,32 @@ app.get('/', (request, response) => {
 })
 
 //personas
-
-app.get('/info', (request, response) => {
-    const resumen = `<p>La guía telefonica tiene ${persons.length} en este momento</p>`
-    const fecha = new Date()
-    const mensaje = `<div> ${resumen} <div>${fecha}</div></div>`
-    response.send(mensaje)
+app.get('/api/persons', (request, response, next) => {
+    Person.find({}).then(respuesta => {
+        response.json(respuesta)
+    }).catch(error => next(error))
 })
 
-app.get('/api/persons', (request, response) => {
-    response.json(persons)
+app.get('/api/persons/:id', (request, response, next) => {
+    const { id } = request.params
+
+    Person.findById(id).then(respuesta => {
+        return respuesta
+            ? response.json(respuesta)
+            : response.status(404).end()
+    }).catch(error => next())
 })
 
-app.get('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
-    const note = persons.find(note => note.id === id)
+app.delete('/api/persons/:id', (request, response, next) => {
+    const { id } = request.params
 
-    if (note) {
-        response.json(note)
-    } else {
-        response.status(404).end()
-    }
+    Person.findByIdAndDelete(id).then(respuesta => {
+        response.status(204).end()
+    }).catch(error => next())
+
 })
 
-app.delete('/api/persons/:id', (request, response) => {
-    const id = Number(request.params.id)
-    notes = notes.filter(note => note.id !== id)
-
-    response.status(204).end()
-})
-
-app.post('/api/persons', (request, response) => {
+app.post('/api/persons', (request, response, next) => {
     const body = request.body
 
     if (!body.name) {
@@ -118,77 +74,103 @@ app.post('/api/persons', (request, response) => {
             error: 'Nombre no puede ser vacío'
         })
     }
-
     if (!body.number) {
         return response.status(400).json({
             error: 'Número no puede ser vacío'
         })
     }
 
-    const note = {
-        id: getRandomInt(maxIdRamdom),
+    const newPerson = new Person({
         name: body.name,
         number: body.number
+    })
+
+    newPerson.save().then(persona => {
+        response.json(persona)
+    }).catch(error => next(error))
+})
+
+app.put('/api/persons/:id', (request, response, next) => {
+    const { id } = request.params
+    const note = request.body
+
+    const updateInfo = {
+        number: note.number
     }
 
-    persons = persons.concat(note)
-    console.log('ahora perosn', persons);
-    response.status(201).json(note)
+    Person.findOneAndUpdate(id, updateInfo, { new: true }).then(resultado => {
+        response.status(204).end()
+    }).catch(error => next(error))
 })
 
 
-//notas
-app.get('/api/notes', (request, response) => {
-    response.json(notes)
+//### Notas
+app.get('/api/notes', (request, response, next) => {
+    Note.find({}).then(notes => {
+        response.json(notes)
+    }).catch(error => next(error))
+
 })
 
-app.get('/api/notes/:id', (request, response) => {
-    const id = Number(request.params.id)
-    const note = notes.find(note => note.id === id)
+app.get('/api/notes/:id', (request, response, next) => {
+    const { id } = request.params
 
-    if (note) {
-        response.json(note)
-    } else {
-        response.status(404).end()
+    Note.findById(id).then(nota => {
+        return nota
+            ? response.json(nota)
+            : response.status(404).end()
+    }).catch(error => next(error))
+})
+
+app.put('/api/notes/:id', (request, response, next) => {
+    const { id } = request.params
+    const note = request.body
+
+    const updateInfo = {
+        content: note.content,
+        important: note.important
     }
+
+    // el 3er parametro que se recibe es para que devuelva el nuevo dato ya actualizado, sino se envia solo devuelve el encontrado antes de actualizar
+    Note.findOneAndUpdate(id, updateInfo, { new: true }).then(resultado => {
+        response.status(204).end()
+    }).catch(error => next(error))
 })
 
-app.delete('/api/notes/:id', (request, response) => {
-    const id = Number(request.params.id)
-    notes = notes.filter(note => note.id !== id)
+app.delete('/api/notes/:id', (request, response, next) => {
+    const { id } = request.params
 
-    response.status(204).end()
+    Note.findByIdAndDelete(id).then(resultado => {
+        response.status(204).end()
+    }).catch(error => next(error))
 })
 
-app.post('/api/notes', (request, response) => {
+app.post('/api/notes', (request, response, next) => {
     const body = request.body
-
     if (!body.content) {
         return response.status(400).json({
             error: 'content missing'
         })
     }
 
-    const note = {
+    const newNote = new Note({
         content: body.content,
         important: body.important || false,
         date: new Date(),
-        id: generateId(notes),
-    }
-    console.log(request.headers)
-    notes = notes.concat(note)
-    response.json(note)
+    })
+    // guardando datos
+    newNote.save().then(nota => {
+        response.json(nota)
+    }).catch(error => next(error))
 })
 
-const unknownEndpoint = (request, response) => {
-    response.status(404).send({ error: 'unknown endpoint' })
-}
+//midlware de 404
+app.use(notFound)
 
-app.use(unknownEndpoint)
-
+//midlware de errores
+app.use(handleErrors)
 
 const PORT = process.env.PORT || 3001
-
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 })
