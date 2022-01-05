@@ -13,19 +13,6 @@ app.use(cors()) //liberando cualquier origen
 app.use(express.json())
 app.use('/images', express.static('images'))
 
-const maxIdRamdom = 999999999
-
-const generateId = (listado) => {
-    const maxId = listado.length > 0
-        ? Math.max(...listado.map(n => n.id))
-        : 0
-    return maxId + 1
-}
-
-const getRandomInt = (max) => {
-    return Math.floor(Math.random() * max)
-}
-
 const requestLogger = (request, response, next) => {
     console.log('Method:', request.method)
     console.log('Path:  ', request.path)
@@ -102,7 +89,6 @@ app.put('/api/persons/:id', (request, response, next) => {
         response.status(204).end()
     }).catch(error => next(error))
 })
-
 
 //### Notas
 app.get('/api/notes', (request, response, next) => {
