@@ -86,7 +86,7 @@ app.put('/api/persons/:id', (request, response, next) => {
     }
 
     Person.findOneAndUpdate(id, updateInfo, { new: true }).then(resultado => {
-        response.status(204).end()
+        response.json(resultado)
     }).catch(error => next(error))
 })
 
@@ -119,7 +119,7 @@ app.put('/api/notes/:id', (request, response, next) => {
 
     // el 3er parametro que se recibe es para que devuelva el nuevo dato ya actualizado, sino se envia solo devuelve el encontrado antes de actualizar
     Note.findOneAndUpdate(id, updateInfo, { new: true }).then(resultado => {
-        response.status(204).end()
+        response.json(resultado)
     }).catch(error => next(error))
 })
 
