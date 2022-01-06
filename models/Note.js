@@ -1,7 +1,11 @@
 const {Schema, model } = require('mongoose')
 
 const noteSchema = new Schema({
-    content: String,
+    content: {
+        type: String,
+        minlength: 5,
+        required: true
+    },
     date: Date,
     important: Boolean
 })

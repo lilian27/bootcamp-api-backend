@@ -12,6 +12,8 @@ mongoose.connect(uri, {
     .catch(e => console.log('error conectando BDD', e));
 
 //cerrando conex    
+/*
 process.on('uncaughtException', () =>{
     mongoose.connection.disconnect()
 })
+*/
