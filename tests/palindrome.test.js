@@ -1,7 +1,7 @@
 const { palindrome } = require('../utils/for_testing.js')
 
 
-describe('Palindromos', () => {
+describe.skip('Palindromos', () => {
 
 
     test('palindrome of lilian', () => {

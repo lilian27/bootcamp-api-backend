@@ -88,17 +88,15 @@ app.put('/api/persons/:id', (request, response, next) => {
     }
 
     Person.findByIdAndUpdate(id, updateInfo, { new: true }).then(resultado => {
-        console.log("resultado",resultado)
+        console.log("resultado", resultado)
         response.json(resultado)
     }).catch(error => next(error))
 })
 
-//### Notas
-app.get('/api/notes', (request, response, next) => {
-    Note.find({}).then(notes => {
-        response.json(notes)
-    }).catch(error => next(error))
-
+//### Notas  queda como codigo sincrono pero no se conviere a sincrono
+app.get('/api/notes', async (request, response, next) => {
+    const notes = await Note.find({})
+    response.json(notes)
 })
 
 app.get('/api/notes/:id', (request, response, next) => {
@@ -134,7 +132,7 @@ app.delete('/api/notes/:id', (request, response, next) => {
     }).catch(error => next(error))
 })
 
-app.post('/api/notes', (request, response, next) => {
+app.post('/api/notes', async (request, response, next) => {
     const body = request.body
     if (!body.content) {
         return response.status(400).json({
@@ -148,9 +146,19 @@ app.post('/api/notes', (request, response, next) => {
         date: new Date(),
     })
     // guardando datos
+    /*
     newNote.save().then(nota => {
         response.json(nota)
     }).catch(error => next(error))
+    */
+    try {
+        const nota = await newNote.save()
+        response.json(nota)
+    }catch(error){
+        console.log('VOY AL ERROR NEXT()')
+        next(error)
+    }
+    
 })
 
 //midlware de 404
@@ -164,4 +172,4 @@ const server = app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 })
 
-module.exports = {app, server}
+module.exports = { app, server }
