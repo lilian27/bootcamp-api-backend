@@ -3,11 +3,13 @@ require('./mongo')  // como se importa y se ejecuta y se conecta y ya o hacer un
 const express = require('express')
 const app = express()
 const cors = require('cors')
+const logger = require('./utils/logger')
 
 const Note = require('./models/Note')
 const Person = require('./models/Person')
 const notFound = require('./middleware/notFound.js')
 const handleErrors = require('./middleware/handleErrors.js')
+const usersRouter = require('./controllers/users')
 
 app.use(cors()) //liberando cualquier origen
 app.use(express.json())
@@ -161,6 +163,8 @@ app.post('/api/notes', async (request, response, next) => {
     
 })
 
+app.use('/api/users', usersRouter)
+
 //midlware de 404
 app.use(notFound)
 
@@ -169,7 +173,7 @@ app.use(handleErrors)
 
 const PORT = process.env.PORT || 3001
 const server = app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`)
+    logger.info(`Server running on port ${PORT}`)
 })
 
 module.exports = { app, server }
