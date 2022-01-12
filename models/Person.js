@@ -1,13 +1,14 @@
-const {Schema, model } = require('mongoose')
+const mongoose = require('mongoose')
 
-const personSchema = new Schema({
+
+const personSchema = new mongoose.Schema({
     name: String,
     number: Number
 })
 
 
 personSchema.set('toJSON', {
-    transform: (document, returnedObject) =>{
+    transform: (document, returnedObject) => {
         returnedObject.id = returnedObject._id
         delete returnedObject._id
         delete returnedObject.__v
@@ -15,6 +16,4 @@ personSchema.set('toJSON', {
 })
 
 // el esquema es a nivel de aplicacion no de BDD
-const Person = model('Person', personSchema)
-
-module.exports = Person
+module.exports = mongoose.model('Person', personSchema)

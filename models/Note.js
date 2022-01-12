@@ -1,6 +1,6 @@
-const {Schema, model } = require('mongoose')
+const mongoose = require('mongoose')
 
-const noteSchema = new Schema({
+const noteSchema = new mongoose.Schema({
     content: {
         type: String,
         minlength: 5,
@@ -9,7 +9,7 @@ const noteSchema = new Schema({
     date: Date,
     important: Boolean,
     user:{
-        type: Schema.Types.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     }
 })
@@ -18,13 +18,11 @@ const noteSchema = new Schema({
 // internamente se ejecuta el toJSON aqui se puede transformar el objeto esperado y establecer como va a ser expuesto
 noteSchema.set('toJSON', {
     transform: (document, returnedObject) =>{
-        returnedObject.id = returnedObject._id
+        returnedObject.id = returnedObject._id.toString()
         delete returnedObject._id
         delete returnedObject.__v
     }
 })
 
 // el esquema es a nivel de aplicacion no de BDD
-const Note = model('Note', noteSchema)
-
-module.exports = Note
+module.exports = mongoose.model('Note', noteSchema)

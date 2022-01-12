@@ -5,7 +5,7 @@ const app = express()
 const cors = require('cors')
 const logger = require('./utils/logger')
 const notFound = require('./middleware/notFound.js')
-const handleErrors = require('./middleware/handleErrors.js')
+const middleware = require('./middleware/handleErrors.js')
 const usersRouter = require('./controllers/users')
 const notesRouter = require('./controllers/notes')
 const personsRouter = require('./controllers/persons')
@@ -23,8 +23,9 @@ const requestLogger = (request, response, next) => {
     next()
 }
 
-
 app.use(requestLogger)
+
+app.use(middleware.requestLogger)
 
 app.use('/api/users', usersRouter)
 app.use('/api/notes', notesRouter)
@@ -34,7 +35,9 @@ app.use('/api/persons', personsRouter)
 app.use(notFound)
 
 //midlware de errores
-app.use(handleErrors)
+app.use(middleware.unknownEndpoint)
+app.use(middleware.errorHandler)
+
 
 const PORT = process.env.PORT || 3001
 const server = app.listen(PORT, () => {
