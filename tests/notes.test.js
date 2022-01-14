@@ -1,14 +1,9 @@
 
 const mongoose = require('mongoose')
-//const { server } = require('../index')
+const { server } = require('../index')
 const Note = require('../models/Note')
 
-//const { api, initialNotes, getAllContentNotes } = require('./helpers')
-const initialNotes  = require('./helpers')
-const supertest = require('supertest')
-const app = require('../app')
-
-const api = supertest(app)
+const { api, initialNotes, getAllContentNotes } = require('./helpers')
 
 beforeEach(async () => {
     await Note.deleteMany({})
@@ -117,6 +112,6 @@ describe('Delete a note', () =>{
 
 afterAll(async () => {
     await mongoose.connection.close()
-    //await server.close()
+    await server.close()
     await new Promise(resolve => setTimeout(() => resolve(), 500)); // PLUS THE HACK PROVIDED BY @yss14
 })
