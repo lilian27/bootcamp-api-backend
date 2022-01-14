@@ -5,18 +5,17 @@ const bcrypt = require('bcrypt')
 const User = require('../models/User')
 const { api, getUsers } = require('./helpers')
 
-describe('Created a new user', () => {
+describe('when there is initially one user in db', () => {
     beforeEach(async () => {
         await User.deleteMany({})
 
         const passwordHash = await bcrypt.hash('pswd', 10)
-        const user = new User({ username: 'lilian', passwordHash })
+        const user = new User({ username: 'root', passwordHash })
 
         await user.save()
     })
 
-    test('works as expected creating a fresh username', async () => {
-        // cuantos usuarios al princio en la BDD
+    test('creation succeeds with a fresh username', async () => {
         const usersAtStart = await getUsers()
 
         const newUser = {
@@ -31,23 +30,38 @@ describe('Created a new user', () => {
             .expect(201)
             .expect('Content-Type', /application\/json/)
 
-        const userAtEnd = await getUsers()
-        expect(userAtEnd).toHaveLength(usersAtStart.length + 1)
+        const usersAtEnd = await getUsers()
+        expect(usersAtEnd).toHaveLength(usersAtStart.length + 1)
 
-        // buscar en el nuvo username en la BDD
-        const usernames = userAtEnd.map(user => user.username)
+        const usernames = usersAtEnd.map(u => u.username)
         expect(usernames).toContain(newUser.username)
+    })
+
+    test('creation fails with proper statuscode and message if username already taken', async () => {
+        const usersAtStart = await getUsers()
+        const newUser = {
+            username: 'root',
+            name: 'Superuser',
+            password: 'salainen',
+        }
+
+        const result = await api
+            .post('/api/users')
+            .send(newUser)
+            .expect(400)
+            .expect('Content-Type', /application\/json/)
+
+        expect(result.body.error).toContain('`username` to be unique')
+
+        const usersAtEnd = await getUsers()
+        expect(usersAtEnd).toHaveLength(usersAtStart.length)
     })
 })
 
 // se ejecuta cuando terinen todos los test
-/*
+
 afterAll(async () => {
     await mongoose.connection.close()
     await server.close()
     await new Promise(resolve => setTimeout(() => resolve(), 500)); // PLUS THE HACK PROVIDED BY @yss14
 })
-*/
-afterAll(() => {
-    mongoose.connection.close()
-  })

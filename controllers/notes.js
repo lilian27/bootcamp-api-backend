@@ -7,41 +7,36 @@ notesRouter.get('/', async (request, response, next) => {
     response.json(notes)
 })
 
-notesRouter.get('/:id', (request, response, next) => {
+notesRouter.get('/:id', async (request, response, next) => {
     const { id } = request.params
-
-    Note.findById(id).then(nota => {
-        return nota
-            ? response.json(nota)
-            : response.status(404).end()
-    }).catch(error => next(error))
+    const note = await Note.findById(id)
+    
+    return nota
+        ? response.json(nota)
+        : response.status(404).end()
 })
 
-notesRouter.put('/:id', (request, response, next) => {
+notesRouter.put('/:id', async (request, response, next) => {
     const { id } = request.params
     const note = request.body
-
     const updateInfo = {
         content: note.content,
         important: note.important
     }
 
     // el 3er parametro que se recibe es para que devuelva el nuevo dato ya actualizado, sino se envia solo devuelve el encontrado antes de actualizar
-    Note.findByIdAndUpdate(id, updateInfo, { new: true }).then(resultado => {
-        response.json(resultado)
-    }).catch(error => next(error))
-
+    Note.findByIdAndUpdate(id, updateInfo, { new: true })
+    response.json(resultado)
 })
 
-notesRouter.delete('/:id', (request, response, next) => {
+notesRouter.delete('/:id', async (request, response) => {
     const { id } = request.params
 
-    Note.findByIdAndDelete(id).then(resultado => {
-        response.status(204).end()
-    }).catch(error => next(error))
+    await Note.findByIdAndDelete(id)
+    response.status(204).end()
 })
 
-notesRouter.post('/', async (request, response, next) => {
+notesRouter.post('/', async (request, response) => {
     const body = request.body
     if (!body.content) {
         return response.status(400).json({
@@ -54,20 +49,9 @@ notesRouter.post('/', async (request, response, next) => {
         important: body.important || false,
         date: new Date(),
     })
-    // guardando datos
-    /*
-    newNote.save().then(nota => {
-        response.json(nota)
-    }).catch(error => next(error))
-    */
-    try {
-        const nota = await newNote.save()
-        response.json(nota)
-    } catch (error) {
-        console.log('VOY AL ERROR NEXT()')
-        next(error)
-    }
 
+    const nota = await newNote.save()
+    response.json(nota)
 })
 
 module.exports = notesRouter

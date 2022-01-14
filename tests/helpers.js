@@ -29,9 +29,15 @@ const getUsers = async () => {
     return usersDB.map(user => user.toJSON())
 }
 
+const notesInDb = async () => {
+    const notes = await Note.find({})
+    return notes.map(note => note.toJSON())
+  }
+
 module.exports = {
     api,
     initialNotes,
     getAllContentNotes,
-    getUsers
+    getUsers, 
+    notesInDb
 }
