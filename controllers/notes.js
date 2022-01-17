@@ -1,16 +1,17 @@
 const notesRouter = require('express').Router()
 const Note = require('../models/Note')
+const User = require('../models/User')
 
 // /api/notes
 notesRouter.get('/', async (request, response, next) => {
-    const notes = await Note.find({})
+    const notes = await Note.find({}).populate('user', { username: 1, name: 1 })
     response.json(notes)
 })
 
 notesRouter.get('/:id', async (request, response, next) => {
     const { id } = request.params
     const note = await Note.findById(id)
-    
+
     return nota
         ? response.json(nota)
         : response.status(404).end()
@@ -38,6 +39,8 @@ notesRouter.delete('/:id', async (request, response) => {
 
 notesRouter.post('/', async (request, response) => {
     const body = request.body
+    const user = await User.findById(body.userId)
+
     if (!body.content) {
         return response.status(400).json({
             error: 'content missing'
@@ -46,11 +49,15 @@ notesRouter.post('/', async (request, response) => {
 
     const newNote = new Note({
         content: body.content,
-        important: body.important || false,
+        important: body.important === undefined ? false : body.important,
         date: new Date(),
+        user: user._id
     })
 
     const nota = await newNote.save()
+    user.notes = user.notes.concat(nota._id)
+    await user.save()
+
     response.json(nota)
 })
 

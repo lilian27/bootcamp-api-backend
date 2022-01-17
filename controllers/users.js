@@ -5,13 +5,14 @@ const User = require('../models/User')
 //    /api/users
 
 usersRouter.get('/', async (request, response, next) => {
-    const user = await User.find({})
+    const user = await User.find({}).populate('notes', { content: 1, date: 1 })
+
     response.json(user)
 })
 
-usersRouter.post('/', async(request, response) =>{
-    const {body} = request
-    const {username, name, password} = body
+usersRouter.post('/', async (request, response) => {
+    const { body } = request
+    const { username, name, password } = body
 
     const saltRounds = 10
     const passwordHash = await bcrypt.hash(password, saltRounds)

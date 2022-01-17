@@ -2,8 +2,7 @@
 const mongoose = require('mongoose')
 const { server } = require('../index')
 const Note = require('../models/Note')
-
-const { api, initialNotes, getAllContentNotes } = require('./helpers')
+const { api, initialNotes, getAllContentNotes, getUsers } = require('./helpers')
 
 beforeEach(async () => {
     await Note.deleteMany({})
@@ -43,10 +42,14 @@ describe('when there is initially some notes saved', () => {
 
 
 describe('Add new note', () => {
-    test('a vali note can be added', async () => {
+    test('a valid note can be added', async () => {
+
+        const usersAtEnd = await getUsers()
+        const idUsuario = usersAtEnd[0].id
         const newNote = {
             content: 'agregando nuevo',
-            import: true
+            import: true,
+            userId: idUsuario
         }
 
         await api
