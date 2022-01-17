@@ -28,7 +28,7 @@ mongoose.connect(config.MONGO_DB_URI, { useNewUrlParser: true, useUnifiedTopolog
 
 app.use(cors()) //liberando cualquier origen
 app.use(express.json())
-app.use('/images', express.static('images')) //disponiendoimagenes
+app.use(express.static('build')) //disponiendoimagenes
 app.use(middleware.requestLogger)
 
 app.use('/api/login', loginRouter)
