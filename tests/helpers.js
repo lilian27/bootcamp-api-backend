@@ -7,7 +7,8 @@ const initialNotes = [
     {
         content: 'ICH lilian',
         important: true,
-        date: new Date()
+        date: new Date(),
+        "id": "61e5ab4f6e644b46107e45f8"
     },
     {
         content: 'segundo registro',

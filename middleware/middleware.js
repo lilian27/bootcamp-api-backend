@@ -13,7 +13,7 @@ const unknownEndpoint = (request, response) => {
 }
 
 const errorHandler = (error, request, response, next) => {
-    logger.error("HANDLE ERROR:", error.message)
+    logger.error("HANDLE ERROR::::",error.name, error.message)
     if (error.name === 'CastError')
         return response.status(400).send({ error: 'Id de busqueda no valido' })
     else if (error.name === 'ValidationError')
@@ -23,7 +23,16 @@ const errorHandler = (error, request, response, next) => {
             error: 'invalid token'
         })
     }
+    else if (error.name === 'TokenExpirerError') {
+        return response.status(401).json({
+            error: 'TOKEN expirado'
+        })
+    }
+    else{
+        return response.status(500).end()
+    }
 
+    logger.error(error.name)
     logger.error(error.message)
     next(error)
 }

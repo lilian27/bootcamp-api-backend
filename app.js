@@ -8,6 +8,7 @@ const usersRouter = require('./controllers/users')
 const notesRouter = require('./controllers/notes')
 const personsRouter = require('./controllers/persons')
 const loginRouter = require('./controllers/login')
+const testingRouter = require('./controllers/testing')
 
 const logger = require('./utils/logger')
 const notFound = require('./middleware/notFound.js')
@@ -35,6 +36,11 @@ app.use('/api/login', loginRouter)
 app.use('/api/users', usersRouter)
 app.use('/api/notes', notesRouter)
 app.use('/api/persons', personsRouter)
+
+//if(process.env.NODE_ENV === 'test'){
+   // const testingRouter = require('./controllers/testing')
+app.use('/api/testing', testingRouter)
+//}
 
 //midlware de errores
 app.use(middleware.unknownEndpoint)

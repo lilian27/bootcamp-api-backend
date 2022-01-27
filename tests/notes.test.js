@@ -1,4 +1,3 @@
-
 const mongoose = require('mongoose')
 const { server } = require('../index')
 const Note = require('../models/Note')
