@@ -36,8 +36,9 @@ notesRouter.put('/:id', async (request, response, next) => {
     }
 
     // el 3er parametro que se recibe es para que devuelva el nuevo dato ya actualizado, sino se envia solo devuelve el encontrado antes de actualizar
-    Note.findByIdAndUpdate(id, updateInfo, { new: true })
+    await Note.findByIdAndUpdate(id, updateInfo, { new: true })
     response.json(resultado)
+
 })
 
 notesRouter.delete('/:id', async (request, response) => {
